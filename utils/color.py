@@ -17,7 +17,7 @@ else:
     try:
         import curses
         curses.setupterm()
-        if curses.tigetnum('color') < 0:
+        if curses.tigetnum('colors') < 0:
             WOOD_COLOR = False
     except ImportError:
         pass

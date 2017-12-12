@@ -3,10 +3,13 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
+import os
+import sys
 import errno
 import textwrap
 
 import fcntl
+import locale
 from struct import unpack, pack
 from termios import TIOCGWINSZ
 from wood import constants as C
@@ -20,6 +23,7 @@ class Display(object):
         self.columns = None
         self.verbosity = verbosity
         self._set_column_width()
+        self._output_encoding()
 
     def display(self, msg, color=None, stderr=None):
 
@@ -27,17 +31,19 @@ class Display(object):
         if color:
             msg = stringc(msg, color)
         
-        if not msg.endswith(u"\n"):
-            msg2 = msg + u"\n"
-        else:
-            msg2 = msg
+        #if not msg.endswith(u"\n"):
+        #    msg2 = msg + u"\n"
+        #else:
+        #     msg2 = msg
+        msg2 = msg
 
         if not stderr:
             fileobj = sys.stdout
         else:
             fileobj = sys.stderr
+        msg3 = msg2.encode(self.encoding)
 
-        fileobj.write(msg2)
+        fileobj.write(msg3)
         try:
             fileobj.flush()
         except IOError as e:
@@ -82,3 +88,8 @@ class Display(object):
         else:
             tty_size = 0
         self.columns = max(79, tty_size - 1)
+
+    def _output_encoding(self, stderr=False):
+        self.encoding = locale.getpreferredencoding()
+        if self.encoding in ('mac-roman',):
+            self.encoding = 'utf-8'
