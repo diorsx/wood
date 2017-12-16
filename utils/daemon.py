@@ -58,13 +58,13 @@ class CDaemonWrap(object):
         pid = str(os.getpid())
         file(self.pidfile,'w+').write('%s\n' % pid)
 
-        signal.signal(SIGKILL, sig_handler)    
-        signal.signal(SIGTERM, sig_handler)
+        #signal.signal(SIGKILL, sig_handler)    
+        #signal.signal(SIGTERM, sig_handler)
         #注册进程退出时的回调
         atexit.register(self.del_pid)
 
-    def sig_handler(signum, frame):
-        self.del_pid()
+    # def sig_handler(signum, frame):
+    #     self.del_pid()
 
     def get_pid(self):
         #从pid文件中获取pid
