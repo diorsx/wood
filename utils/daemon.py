@@ -29,7 +29,8 @@ class CDaemonWrap(object):
             sys.stderr.write('fork #1 failed: %d (%s)\n' % (e.errno, e.strerror))
             sys.exit(1)
             
-        os.chdir("/") 
+        basedir = os.path.expanduser(r'~')
+        os.chdir(basedir)
         os.setsid() 
         os.umask(0) 
   
