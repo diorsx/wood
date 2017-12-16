@@ -6,7 +6,8 @@ import sys
 import time
 import atexit 
 import string
-from signal import SIGTERM 
+import signal
+from signal import SIGTERM, SIGKILL
 
 #description: 一个守护进程包装类, 具备常用的start|stop|restart|status功能, 使用方便  
 #需要改造为守护进程的程序只需要重写基类的run函数就可以了
@@ -56,9 +57,14 @@ class CDaemonWrap(object):
         #创建processid文件
         pid = str(os.getpid())
         file(self.pidfile,'w+').write('%s\n' % pid)
-  
+
+        signal.signal(SIGKILL, sig_handler)    
+        signal.signal(SIGTERM, sig_handler)
         #注册进程退出时的回调
         atexit.register(self.del_pid)
+
+    def sig_handler(signum, frame):
+        self.del_pid()
 
     def get_pid(self):
         #从pid文件中获取pid
