@@ -2,7 +2,7 @@
 '''
 Auther: Wood
 Date: 2017-12-17
-Desc: mysqlÁ¬½ÓÆ÷ÊµÏÖ
+Desc: mysqlÃÂ¬Â½Ã“Ã†Ã·ÃŠÂµÃÃ–
 '''
 
 import os
@@ -12,10 +12,10 @@ import functools
 import threading
 import logging
 
-#È«¾Ö¶ÔÏó, º¯Êı¶ÔÆä¸³Öµºó, ²»Ğè·µ»Ø
+#å…¨å±€å¯¹è±¡, å‡½æ•°å¯¹å…¶èµ‹å€¼å, ä¸éœ€è¿”å›
 engine = None
 
-#À©Õ¹×ÖµäÀàĞÍ, Ğè×¢Òâ´«²ÎÊÇ·ñ¿Éhash
+#æ‰©å±•å­—å…¸ç±»å‹, éœ€æ³¨æ„ä¼ å‚æ˜¯å¦å¯hash
 class Dict(dict):
 
     def __init__(self, names=(),values=(), **kwargs):
@@ -32,7 +32,7 @@ class Dict(dict):
     def __setattr__(self, key, value):
         self[key] = value
         
-#Òì³£´¦Àí
+#å¼‚å¸¸å¤„ç†
 class DBError(Exception):
     pass
 
@@ -43,9 +43,9 @@ class _Engine(object):
 
     '''
     property:
-        _connect: MysqlÁ¬½ÓÆ÷, ÖµÎªÊµÀı³õÊ¼»¯Ê±´«Èëmysql.connector.connect¶ÔÏó
+        _connect: Mysqlè¿æ¥å™¨, å€¼ä¸ºå®ä¾‹åˆå§‹åŒ–æ—¶ä¼ å…¥mysql.connector.connectå¯¹è±¡
     method:
-        connect: ´Ómysql.connectorÄ£¿é»ñµÃÒ»¸öconnectorÁ¬½ÓÆ÷
+        connect: ä»mysql.connectoræ¨¡å—è·å¾—ä¸€ä¸ªconnectorè¿æ¥å™¨
     '''
     def __init__(self, connect):
         self._connect = connect
@@ -68,7 +68,7 @@ def create_engine(user, password, database, host='127.0.0.1', port=3306, **kw):
     logging.info('Init mysql engine <%s> ok.' % hex(id(engine)))
         
 class _LazyConnection(object):
-    '''¶èĞÔÁ¬½ÓÀà
+    '''æƒ°æ€§è¿æ¥ç±»
     '''
 
     def __init__(self):
@@ -95,7 +95,7 @@ class _LazyConnection(object):
             connection.close()
 
 class _DbCtx(threading.local):
-    '''DbÉÏÏÂÎÄ
+    '''Dbä¸Šä¸‹æ–‡
     '''
     def __init__(self):
         self.connection = None
@@ -149,71 +149,6 @@ def with_connection(func):
     def _wrapper(*args, **kw):
         with _ConnectionCtx():
             return func(*args, **kw)
-    return _wrapper
-
-class _TransactionCtx(object):
-    '''
-    _TransactionCtx object that can handle transactions.
-    '''
-
-    def __enter__(self):
-        global _db_ctx
-        self.should_close_conn = False
-        if not _db_ctx.is_init():
-            # needs open a connection first:
-            _db_ctx.init()
-            self.should_close_conn = True
-        _db_ctx.transactions = _db_ctx.transactions + 1
-        logging.info('begin transaction...' if _db_ctx.transactions==1 else 'join current transaction...')
-        return self
-
-    def __exit__(self, exctype, excvalue, traceback):
-        global _db_ctx
-        _db_ctx.transactions = _db_ctx.transactions - 1
-        try:
-            if _db_ctx.transactions==0:
-                if exctype is None:
-                    self.commit()
-                else:
-                    self.rollback()
-        finally:
-            if self.should_close_conn:
-                _db_ctx.cleanup()
-
-    def commit(self):
-        global _db_ctx
-        logging.info('commit transaction...')
-        try:
-            _db_ctx.connection.commit()
-            logging.info('commit ok.')
-        except:
-            logging.warning('commit failed. try rollback...')
-            _db_ctx.connection.rollback()
-            logging.warning('rollback ok.')
-            raise
-
-    def rollback(self):
-        global _db_ctx
-        logging.warning('rollback transaction...')
-        _db_ctx.connection.rollback()
-        logging.info('rollback ok.')
-
-def transaction():
-    '''
-    Create a transaction object so can use with statement:
-    '''
-    return _TransactionCtx()
-
-def with_transaction(func):
-    '''
-    Decorator that makes function around transaction.
-    '''
-    @functools.wraps(func)
-    def _wrapper(*args, **kw):
-        _start = time.time()
-        with _TransactionCtx():
-            return func(*args, **kw)
-        _profiling(_start)
     return _wrapper
 
 def _select(sql, first, *args):
@@ -297,25 +232,3 @@ def update(sql, *args):
     Execute update SQL.
     '''
     return _update(sql, *args)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
-if __name__ == "__main__":
-    d = Dict(names=(2, 'b', 'd'), values=(1,4,9))
