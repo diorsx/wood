@@ -23,7 +23,7 @@ def _get_linux_network_adapters():
     global network_adapters
 
     for adapter_name in adapter_names:
-         ip_address = socket.inet_ntoa(fcntl.ioctl(
+        ip_address = socket.inet_ntoa(fcntl.ioctl(
             skt.fileno(),
             SIOCGIFADDR,
             struct.pack('256s', adapter_name))[20:24])
@@ -32,7 +32,7 @@ def _get_linux_network_adapters():
             SIOCGIFNETMASK,
             struct.pack('256s', adapter_name))[20:24])
         raw_mac_address = '%02x%02x%02x%02x%02x%02x' % struct.unpack('6B', (fcntl.ioctl(
-            sock.fileno(),
+            skt.fileno(),
             SIOCGHWMAC,
             struct.pack('256s', adapter_name))[18:24]))
         mac_address = ":".join([raw_mac_address[m_counter:m_counter + 2]
