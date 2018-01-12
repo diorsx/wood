@@ -32,7 +32,7 @@ class CDaemonWrap(object):
             
         basedir = os.path.expanduser(r'~')
         os.chdir(basedir)
-        os.setsid() 
+        os.setsid()
         os.umask(0) 
   
         #创建子进程
